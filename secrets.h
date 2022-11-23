@@ -2,8 +2,8 @@
 // const char* password = "spiral-flute-endmill";
 const char* ssid = "Casa St George";
 const char* password = "Bananasinpajamas";
-const char* serverName = "https://us-west-2.aws.data.mongodb-api.com/app/welygray-ggqoi/endpoint/deliverdata?secret=SoSecret";
-
+const char* serverName = "https://us-west-2.aws.data.mongodb-api.com/app/welygray-ggqoi/endpoint/deliverdata";
+const char* name = "WelyGray";
 
 // -- Project -------------------------------------------
 #define CLIENT                  "Wely Gray 1"        // Client ID for the ESP (or something descriptive "Front Garden")

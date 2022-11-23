@@ -100,7 +100,6 @@ float getWeight(){
     int counter = 0;
     long average;
     int numSamples = 300;
-    int mass;
 
     for(counter = 0; counter < numSamples;counter++){
       if(amplifier.available() == true)
@@ -161,9 +160,9 @@ void getDevice()
     doc["device"]["type"] = TYPE;
     doc["device"]["name"] = name;
     doc["device"]["chipid"] = buffer;
-    doc["device"]["bootCount"] = bootCount;
-    doc["device"]["wakeup_reason"] = String(wakeup_reason);
-    //doc["device"]["vbatt_raw"] = vbatt_raw;
+//    doc["device"]["bootCount"] = bootCount;
+//    doc["device"]["wakeup_reason"] = String(wakeup_reason);
+//    doc["device"]["vbatt_raw"] = vbatt_raw;
     //doc["device"]["vbatt"] = map(vbatt_raw, 0, 4096, 0, 4200);
 
 }
