@@ -13,10 +13,39 @@ NAU7802 amplifier;
 #define WEIGHTZERO 2000 //It reads about 2000 at zero although I do see bimodal fluctuation from 2077 to 2251
 #define WEIGHTSLOPE 3.4338 //cal value for load cell units to g 
 
+#define SAMPLEFREQ 300 //seconds
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
+
 StaticJsonDocument<500> doc; //use StaticJSonDocument, which was imported, to create a 500 character long document called doc.
+
+//void setTimezone(String timezone){
+//  Serial.printf("  Setting Timezone to %s\n",timezone.c_str());
+//  setenv("TZ",timezone.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
+//  tzset();
+//}
+//
+//void initTime(String timezone){
+//  struct tm timeinfo;
+//
+//  Serial.println("Setting up time");
+//  configTime(0, 0, "pool.ntp.org");    // First connect to NTP server, with 0 TZ offset
+//  if(!getLocalTime(&timeinfo)){
+//    Serial.println("  Failed to obtain time");
+//    return;
+//  }
+//  Serial.println("  Got the time from NTP");
+//  // Now we can set the real timezone
+//  setTimezone(timezone);
+//}
 
 void setup() {
   
+//  initTime("PST8PDT,M3.2.0,M11.1.0");//Vancouver
+    bool powerUp();
+  esp_sleep_enable_timer_wakeup(SAMPLEFREQ * uS_TO_S_FACTOR);
+    Serial.println("Setup ESP32 to sleep for every " + String(SAMPLEFREQ) +
+  " Seconds");
+
   // Initialize serial and wait for port to open.
   Serial.begin(9600);
   delay(1500); 
@@ -25,10 +54,10 @@ void setup() {
   amplifier.begin();
   amplifier.setSampleRate(NAU7802_SPS_80);
 
-  Serial.print("Connecting to ");
-  Serial.print(ssid);
-  Serial.print(" with password ");
-  Serial.println(password);
+//  Serial.print("Connecting to ");
+//  Serial.print(ssid);
+//  Serial.print(" with password ");
+//  Serial.println(password);
 
   WiFi.begin(ssid, password);
   while(WiFi.status() != WL_CONNECTED) {
@@ -41,33 +70,42 @@ void setup() {
 }
 
 void loop() {
-    delay(200);
-    
+    //for loop for non-blocking. This helps the temperature sensor stabilize.
+    for (int i=0;i<10;i++){
+      delay(1000);
+    }    
     getDevice();
     
 //    Serial.println("temperature");
-    getTemp();
-//    Serial.println(temperature, 3);// second number is the # digits printed.
+    float temperature = getTemp();
+    Serial.print("temperature:");
+    Serial.print(temperature, 3);// second number is the # digits printed.
+    Serial.print(",");
 
 //    Serial.println(amplifier.getRegister(0x11));
-
+//Needs time for amplfier to switch over and stabilize?
     delay(1500);
 
     //Serial.println("weight");
-    getWeight();
-    //Serial.println(weight, 3);
+    float weight = getWeight();
+    Serial.print("weight:");
+    Serial.println(weight, 3);
+    Serial.print(",");
 
-    Serial.print("Connected to WiFi network with IP Address: ");
-    Serial.println(WiFi.localIP());
+//    Serial.print("Connected to WiFi network with IP Address: ");
+//    Serial.println(WiFi.localIP());
 
-    delay(1000);
-    Serial.println("Posting...");
+//    delay(1000);
+//    Serial.println("Posting...");
+
     POSTData();
-    serializeJsonPretty(doc, Serial);
-    Serial.println("\nDone.");
+    
+//    serializeJsonPretty(doc, Serial);
+//    Serial.println("\nDone.");
     
 //    Serial.println(amplifier.getRegister(0x11));
-    
+      bool powerDown();
+      esp_deep_sleep_start();
 }
 
 float getTemp(){
@@ -120,17 +158,18 @@ void POSTData()
 {
       
       if(WiFi.status()== WL_CONNECTED){
-      HTTPClient http;
-
-      http.begin(serverName);
-      http.addHeader("Content-Type", "application/json");
-
-      String json;
-      serializeJson(doc, json);
-
-      Serial.println(json);
-      int httpResponseCode = http.POST(json);
-      Serial.println(httpResponseCode);
+        HTTPClient http;
+  
+        http.begin(serverName);
+        http.addHeader("Content-Type", "application/json");
+  
+        String json;
+        serializeJson(doc, json);
+  
+        Serial.println(json);
+        int httpResponseCode = http.POST(json);
+        
+        Serial.println(httpResponseCode);
       }
 }
 
@@ -141,7 +180,7 @@ void getDevice()
     wakeup_reason = esp_sleep_get_wakeup_cause();
 
     uint64_t chipid=ESP.getEfuseMac();//The chip ID is essentially its MAC address(length: 6 bytes).
-    Serial.printf("***ESP32 Chip ID = %04X%08X\n",(uint16_t)(chipid>>32),(uint32_t)chipid);//print High 2 bytes
+//    Serial.printf("***ESP32 Chip ID = %04X%08X\n",(uint16_t)(chipid>>32),(uint32_t)chipid);//print High 2 bytes
     char buffer[200];
     sprintf(buffer, "%04X%08X",(uint16_t)(chipid>>32),(uint32_t)chipid);
     //sprintf(buffer, "esp32%" PRIu64, ESP.getEfuseMac());

@@ -1,8 +1,10 @@
-// const char* ssid = "MakerLabsNG-2.4GHz";
-// const char* password = "spiral-flute-endmill";
-const char* ssid = "Casa St George";
-const char* password = "Bananasinpajamas";
-const char* serverName = "https://us-west-2.aws.data.mongodb-api.com/app/welygray-ggqoi/endpoint/deliverdata";
+ const char* ssid = "MakerLabsNG-2.4GHz";
+ const char* password = "spiral-flute-endmill";
+//const char* ssid = "Casa St George";
+//const char* password = "Bananasinpajamas";
+//const char* ssid = "littlewhitewolf";
+//const char* password = "mauzawowza";
+const char* serverName = "https://us-west-2.aws.data.mongodb-api.com/app/welygray-ggqoi/endpoint/deliverdata?secret=plants";
 const char* name = "WelyGray";
 
 // -- Project -------------------------------------------
