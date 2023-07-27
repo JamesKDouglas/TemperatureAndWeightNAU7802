@@ -1,0 +1,3 @@
+This code is for a Wely wireless weighing lysimeter. This particular version of the lysimeter uses an ESP32-S2 Thing from Sparkfun 3D printed PLA housing, 50kg load cell and nau7802 24 bit amplifier with temperature sensor. As of now (July, 2023) the device is programmed to upload data to a MongoDB Atlas instance through Realm.
+
+It was used to monitor a yeast incubator for a biofuel project. We found that the power was turning off in the middle of the night, dropping the temperature of the incubation.
