@@ -13,7 +13,7 @@ NAU7802 amplifier;
 #define WEIGHTZERO 2000 //It reads about 2000 at zero although I do see bimodal fluctuation from 2077 to 2251
 #define WEIGHTSLOPE 3.4338 //cal value for load cell units to g 
 
-#define SAMPLEFREQ 300 //seconds
+#define SAMPLEFREQ 5 //seconds
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 
 StaticJsonDocument<500> doc; //use StaticJSonDocument, which was imported, to create a 500 character long document called doc.
@@ -40,16 +40,19 @@ StaticJsonDocument<500> doc; //use StaticJSonDocument, which was imported, to cr
 
 void setup() {
   
-//  initTime("PST8PDT,M3.2.0,M11.1.0");//Vancouver
-    bool powerUp();
+  //  initTime("PST8PDT,M3.2.0,M11.1.0");//Vancouver
+  bool powerUp();
+  
   esp_sleep_enable_timer_wakeup(SAMPLEFREQ * uS_TO_S_FACTOR);
-    Serial.println("Setup ESP32 to sleep for every " + String(SAMPLEFREQ) +
-  " Seconds");
+
 
   // Initialize serial and wait for port to open.
-  Serial.begin(9600);
-  delay(1500); 
-
+  Serial.begin(115200);
+  for (int i=0;i<20;i++){
+      delay(100);
+  }  
+  
+  Serial.println("Setup ESP32S2 dev module to sleep for every " + String(SAMPLEFREQ) + " Seconds");
   Wire.begin();
   amplifier.begin();
   amplifier.setSampleRate(NAU7802_SPS_80);
@@ -98,7 +101,7 @@ void loop() {
 //    delay(1000);
 //    Serial.println("Posting...");
 
-    POSTData();
+      POSTData();
     
 //    serializeJsonPretty(doc, Serial);
 //    Serial.println("\nDone.");
@@ -114,7 +117,7 @@ float getTemp(){
   
   delay(1500);
   
-  //default sample rate is 80hz. Noise increases at higher rates. This code crashes at some lower rates. Changin the rate also changes the output!
+  //default sample rate is 80hz. Noise increases at higher rates. This code crashes at some lower rates. Changing the rate also changes the output!
 
   float tempSlope = TEMPSLOPE;
   float intercept = INTERCEPT;
@@ -147,7 +150,7 @@ float getWeight(){
       }
     }
 
-    average = accumulator/counter; // counter survives outside the for loop because it is actually global.
+    average = accumulator/counter;
 
     float mass = (average-WEIGHTZERO)/WEIGHTSLOPE;
     doc["sensors"]["mass"] = mass;
@@ -183,6 +186,7 @@ void getDevice()
 //    Serial.printf("***ESP32 Chip ID = %04X%08X\n",(uint16_t)(chipid>>32),(uint32_t)chipid);//print High 2 bytes
     char buffer[200];
     sprintf(buffer, "%04X%08X",(uint16_t)(chipid>>32),(uint32_t)chipid);
+    
     //sprintf(buffer, "esp32%" PRIu64, ESP.getEfuseMac());
 
     // int vbatt_raw = 0;
@@ -199,6 +203,7 @@ void getDevice()
     doc["device"]["type"] = TYPE;
     doc["device"]["name"] = name;
     doc["device"]["chipid"] = buffer;
+    
 //    doc["device"]["bootCount"] = bootCount;
 //    doc["device"]["wakeup_reason"] = String(wakeup_reason);
 //    doc["device"]["vbatt_raw"] = vbatt_raw;
