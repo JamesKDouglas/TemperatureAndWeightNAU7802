@@ -10,10 +10,10 @@ NAU7802 amplifier;
 
 #define TEMPSLOPE 17247 //the adc reading decreases with increasing temperature. So slope is actually negative. 
 #define INTERCEPT 7446102
-#define WEIGHTZERO 2000 //It reads about 2000 at zero although I do see bimodal fluctuation from 2077 to 2251
+#define WEIGHTZERO 1728 //It reads about 2000 at zero although I do see bimodal fluctuation from 2077 to 2251
 #define WEIGHTSLOPE 3.4338 //cal value for load cell units to g 
 
-#define SAMPLEFREQ 5 //seconds
+#define SAMPLEFREQ 300 //seconds
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 
 StaticJsonDocument<500> doc; //use StaticJSonDocument, which was imported, to create a 500 character long document called doc.
@@ -24,19 +24,19 @@ StaticJsonDocument<500> doc; //use StaticJSonDocument, which was imported, to cr
 //  tzset();
 //}
 //
-//void initTime(String timezone){
-//  struct tm timeinfo;
-//
-//  Serial.println("Setting up time");
-//  configTime(0, 0, "pool.ntp.org");    // First connect to NTP server, with 0 TZ offset
-//  if(!getLocalTime(&timeinfo)){
-//    Serial.println("  Failed to obtain time");
-//    return;
+//  void initTime(String timezone){
+//    struct tm timeinfo;
+//  
+//    Serial.println("Setting up time");
+//    configTime(0, 0, "pool.ntp.org");    // First connect to NTP server, with 0 TZ offset
+//    if(!getLocalTime(&timeinfo)){
+//      Serial.println("  Failed to obtain time");
+//      return;
+//    }
+//    Serial.println("  Got the time from NTP");
+//    // Now we can set the real timezone
+//    setTimezone(timezone);
 //  }
-//  Serial.println("  Got the time from NTP");
-//  // Now we can set the real timezone
-//  setTimezone(timezone);
-//}
 
 void setup() {
   
@@ -151,7 +151,7 @@ float getWeight(){
     }
 
     average = accumulator/counter;
-
+    
     float mass = (average-WEIGHTZERO)/WEIGHTSLOPE;
     doc["sensors"]["mass"] = mass;
     return mass;
