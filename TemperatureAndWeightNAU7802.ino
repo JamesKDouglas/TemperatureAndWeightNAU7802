@@ -10,7 +10,7 @@ NAU7802 amplifier;
 
 #define TEMPSLOPE 17247 //the adc reading decreases with increasing temperature. So slope is actually negative. 
 #define INTERCEPT 7446102
-#define WEIGHTZERO 1728 //It reads about 2000 at zero although I do see bimodal fluctuation from 2077 to 2251
+#define WEIGHTZERO 43714 
 #define WEIGHTSLOPE 3.4338 //cal value for load cell units to g 
 
 #define SAMPLEFREQ 300 //seconds
@@ -46,33 +46,28 @@ void setup() {
 }
 
 void loop() {
-//for loop for non-blocking. This helps the temperature sensor stabilize.
+    //for loop for non-blocking. This helps the temperature sensor stabilize.
     for (int i=0;i<10;i++){
       delay(1000);
     }    
     getDevice();
     
-//    Serial.println("temperature");
     float temperature = getTemp();
-    Serial.print("temperature:");
+//    Serial.print("temperature:");
     Serial.print(temperature, 3);// second number is the # digits printed.
     Serial.print(",");
 
-//    Serial.println(amplifier.getRegister(0x11));
-//Needs time for amplfier to switch over and stabilize?
     delay(1500);
 
-    //Serial.println("weight");
     float weight = getWeight();
-    Serial.print("weight:");
+//    Serial.print("weight:");
     Serial.println(weight, 3);
-    Serial.print(",");
+//    Serial.print(",");
 
-      POSTData();
+    POSTData();
 
-//    Serial.println(amplifier.getRegister(0x11));
-      bool powerDown();
-      esp_deep_sleep_start();
+    bool powerDown();
+    esp_deep_sleep_start();
 }
 
 float getTemp(){
@@ -98,32 +93,12 @@ float getWeight(){
     amplifier.setRegister(0x11, 0);
     
     delay(1500);
-    
-    delay(10);
 
-    long accumulator;
-    int counter = 0;
-    long average;
-    int numSamples = 300;
-
-    for(counter = 0; counter < numSamples;counter++){
-      if(amplifier.available() == true)
-      {
-        long currentReading = amplifier.getReading();
-        accumulator += currentReading;
-      }
-    }
-
-    average = accumulator/counter;
-    
-    float mass = (average-WEIGHTZERO)/WEIGHTSLOPE;
-    doc["sensors"]["mass"] = mass;
-    return mass;
+    return amplifier.getAverage(70);//not more than 80 - times out at 1000 ms
 }
 
 void POSTData()
 {
-      
       if(WiFi.status()== WL_CONNECTED){
         HTTPClient http;
   
@@ -142,7 +117,6 @@ void POSTData()
 
 void getDevice()
 {
-
     esp_sleep_wakeup_cause_t wakeup_reason;
     wakeup_reason = esp_sleep_get_wakeup_cause();
 
