@@ -18,33 +18,11 @@ NAU7802 amplifier;
 
 StaticJsonDocument<500> doc; //use StaticJSonDocument, which was imported, to create a 500 character long document called doc.
 
-//void setTimezone(String timezone){
-//  Serial.printf("  Setting Timezone to %s\n",timezone.c_str());
-//  setenv("TZ",timezone.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
-//  tzset();
-//}
-//
-//  void initTime(String timezone){
-//    struct tm timeinfo;
-//  
-//    Serial.println("Setting up time");
-//    configTime(0, 0, "pool.ntp.org");    // First connect to NTP server, with 0 TZ offset
-//    if(!getLocalTime(&timeinfo)){
-//      Serial.println("  Failed to obtain time");
-//      return;
-//    }
-//    Serial.println("  Got the time from NTP");
-//    // Now we can set the real timezone
-//    setTimezone(timezone);
-//  }
-
 void setup() {
-  
-  //  initTime("PST8PDT,M3.2.0,M11.1.0");//Vancouver
+
   bool powerUp();
   
   esp_sleep_enable_timer_wakeup(SAMPLEFREQ * uS_TO_S_FACTOR);
-
 
   // Initialize serial and wait for port to open.
   Serial.begin(115200);
@@ -57,11 +35,6 @@ void setup() {
   amplifier.begin();
   amplifier.setSampleRate(NAU7802_SPS_80);
 
-//  Serial.print("Connecting to ");
-//  Serial.print(ssid);
-//  Serial.print(" with password ");
-//  Serial.println(password);
-
   WiFi.begin(ssid, password);
   while(WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -73,7 +46,7 @@ void setup() {
 }
 
 void loop() {
-    //for loop for non-blocking. This helps the temperature sensor stabilize.
+//for loop for non-blocking. This helps the temperature sensor stabilize.
     for (int i=0;i<10;i++){
       delay(1000);
     }    
@@ -95,17 +68,8 @@ void loop() {
     Serial.println(weight, 3);
     Serial.print(",");
 
-//    Serial.print("Connected to WiFi network with IP Address: ");
-//    Serial.println(WiFi.localIP());
-
-//    delay(1000);
-//    Serial.println("Posting...");
-
       POSTData();
-    
-//    serializeJsonPretty(doc, Serial);
-//    Serial.println("\nDone.");
-    
+
 //    Serial.println(amplifier.getRegister(0x11));
       bool powerDown();
       esp_deep_sleep_start();
